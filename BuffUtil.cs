@@ -8,6 +8,7 @@ using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using SharpDX;
+using ExileCore.Shared.Enums;
 
 namespace BuffUtil
 {
@@ -27,6 +28,7 @@ namespace BuffUtil
         private DateTime? lastSteelSkinCast;
         private DateTime? lastImmortalCallCast;
         private DateTime? lastMoltenShellCast;
+        private DateTime? lastVaalMoltenShellCast;
         private float HPPercent;
         private float MPPercent;
         private int? nearbyMonsterCount;
@@ -72,6 +74,7 @@ namespace BuffUtil
                 HandleSteelSkin();
                 HandleImmortalCall();
                 HandleMoltenShell();
+                HandleVaalMoltenShell();
                 HandlePhaseRun();
                 HandleWitheringStep();
             }
@@ -337,6 +340,51 @@ namespace BuffUtil
                     LogError($"Exception in {nameof(BuffUtil)}.{nameof(HandleMoltenShell)}: {ex.StackTrace}", 3f);
             }
         }
+        private void HandleVaalMoltenShell()
+        {
+            try
+            {
+                if (!Settings.VaalMoltenShell)
+                    return;
+
+                if (lastVaalMoltenShellCast.HasValue && currentTime - lastVaalMoltenShellCast.Value <
+                    C.VaalMoltenShell.TimeBetweenCasts)
+                    return;
+
+                if (HPPercent > Settings.MoltenShellMaxHP.Value)
+                    return;
+
+                var hasBuff = HasBuff(C.MoltenShell.BuffName);
+                if (!hasBuff.HasValue || hasBuff.Value)
+                    return;
+                //hasBuff = HasBuff(C.VaalMoltenShell.BuffName);
+                //if (!hasBuff.HasValue || hasBuff.Value)
+                //    return;
+
+                var skill = GetUsableSkill(C.VaalMoltenShell.Name, C.VaalMoltenShell.InternalName,
+                    Settings.MoltenShellConnectedSkill.Value);
+                if (skill == null)
+                {
+                    if (Settings.Debug)
+                        LogMessage("Can not cast Vaal Molten Shell - not found in usable skills.", 1);
+                    return;
+                }
+
+                if (!NearbyMonsterCheck())
+                    return;
+
+                if (Settings.Debug)
+                    LogMessage("Casting Vaal Molten Shell", 1);
+
+                inputSimulator.Keyboard.KeyPress((VirtualKeyCode)Settings.VaalMoltenShellKey.Value);
+                lastVaalMoltenShellCast = currentTime + TimeSpan.FromSeconds(rand.NextDouble(0, 0.2));
+            }
+            catch (Exception ex)
+            {
+                if (showErrors)
+                    LogError($"Exception in {nameof(BuffUtil)}.{nameof(HandleVaalMoltenShell)}: {ex.StackTrace}", 3f);
+            }
+        }
 
         private void HandlePhaseRun()
         {
@@ -541,7 +589,7 @@ namespace BuffUtil
                 return null;
             }
 
-            return skills.FirstOrDefault(s =>
+            return skills.FirstOrDefault(s => s.CanBeUsed &&
                 (s.Name == skillName || s.InternalName == skillInternalName));
         }
 
@@ -563,16 +611,35 @@ namespace BuffUtil
 
             var maxDistance = Settings.NearbyMonsterMaxDistance.Value;
             var maxDistanceSquared = maxDistance * maxDistance;
-            var monsterCount = 0;
-            foreach (var monster in localLoadedMonsters)
-                if (IsValidNearbyMonster(monster, playerPosition, maxDistanceSquared))
-                    monsterCount++;
+            
+            nearbyMonsterCount = GetMonsterWithin(maxDistanceSquared, playerPosition);
 
-            nearbyMonsterCount = monsterCount;
             var result = nearbyMonsterCount.Value >= Settings.NearbyMonsterCount;
             if (Settings.Debug.Value && !result)
                 LogMessage("NearbyMonstersCheck failed.", 1);
-            return result;
+            if(result)
+                return result;
+
+            if (Settings.NearbyMagicMonsterCount > 0)
+            {
+                nearbyMonsterCount = GetMonsterWithin(maxDistanceSquared, playerPosition, MonsterRarity.Magic );
+                if (nearbyMonsterCount >= Settings.NearbyMagicMonsterCount)
+                    return true;
+            }
+            if (Settings.NearbyRareMonsterCount > 0)
+            {
+                nearbyMonsterCount = GetMonsterWithin(maxDistanceSquared, playerPosition, MonsterRarity.Rare);
+                if (nearbyMonsterCount >= Settings.NearbyRareMonsterCount)
+                    return true;
+            }
+            if (Settings.NearbyUniqueMonsterCount > 0)
+            {
+                nearbyMonsterCount = GetMonsterWithin(maxDistanceSquared, playerPosition, MonsterRarity.Unique);
+                if (nearbyMonsterCount >= Settings.NearbyUniqueMonsterCount)
+                    return true;
+            }
+            return false;
+
         }
 
         private bool IsValidNearbyMonster(Entity monster, Vector3 playerPosition, int maxDistanceSquared)
@@ -597,6 +664,26 @@ namespace BuffUtil
                     LogError($"Exception in {nameof(BuffUtil)}.{nameof(IsValidNearbyMonster)}: {ex.StackTrace}", 3f);
                 return false;
             }
+        }
+        public int GetMonsterWithin(float maxDistance, Vector3 playerPosition, MonsterRarity rarity = MonsterRarity.White)
+        {
+            int count = 0;
+            float maxDistanceSquare = maxDistance * maxDistance;
+            foreach (var monster in loadedMonsters.Where(x=> x.Rarity>=rarity && (x.IsValid && x.IsHostile && !x.IsHidden && x.IsTargetable)))
+            {              
+                var monsterPosition = monster.Pos;
+
+                var xDiff = playerPosition.X - monsterPosition.X;
+                var yDiff = playerPosition.Y - monsterPosition.Y;
+                var monsterDistanceSquare = (xDiff * xDiff + yDiff * yDiff);
+
+                if (monsterDistanceSquare <= maxDistanceSquare)
+                {
+                    count++;
+                }
+
+            }
+            return count;
         }
 
         private bool IsMonster(Entity entity) => entity != null && entity.HasComponent<Monster>();

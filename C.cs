@@ -27,6 +27,13 @@ namespace BuffUtil
             public const string InternalName = "molten_shell_barrier";
             public static readonly TimeSpan TimeBetweenCasts = TimeSpan.FromSeconds(1);
         }
+        public static class VaalMoltenShell
+        {
+            public const string BuffName = "molten_shell_shield";
+            public const string Name = "FireShield";
+            public const string InternalName = "vaal_molten_shell";
+            public static readonly TimeSpan TimeBetweenCasts = TimeSpan.FromSeconds(1);
+        }
 
         public static class PhaseRun
         {

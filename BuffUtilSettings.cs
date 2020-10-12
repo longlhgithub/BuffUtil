@@ -27,9 +27,11 @@ namespace BuffUtil
             ImmortalCallMaxHP = new RangeNode<int>(50, 0, 100);
 
             MoltenShell = new ToggleNode(false);
+            VaalMoltenShell = new ToggleNode(false);
             MoltenShellKey = new HotkeyNode(Keys.Q);
             MoltenShellConnectedSkill = new RangeNode<int>(1, 1, 13);
             MoltenShellMaxHP = new RangeNode<int>(50, 0, 100);
+            VaalMoltenShellKey = new HotkeyNode(Keys.T);
 
             PhaseRun = new ToggleNode(false);
             PhaseRunKey = new HotkeyNode(Keys.R);
@@ -56,6 +58,9 @@ namespace BuffUtil
 
             RequireMinMonsterCount = new ToggleNode(false);
             NearbyMonsterCount = new RangeNode<int>(1, 1, 30);
+            NearbyMagicMonsterCount = new RangeNode<int>(1, 1, 30);
+            NearbyRareMonsterCount = new RangeNode<int>(1, 1, 30);
+            NearbyUniqueMonsterCount = new RangeNode<int>(1, 1, 30);
             NearbyMonsterMaxDistance = new RangeNode<int>(500, 1, 2000);
             DisableInHideout = new ToggleNode(true);
             Debug = new ToggleNode(false);
@@ -115,13 +120,19 @@ namespace BuffUtil
 
         [Menu("Molten Shell", 4)] public ToggleNode MoltenShell { get; set; }
 
-        [Menu("Molten Shell Key", 41, 4)] public HotkeyNode MoltenShellKey { get; set; }
+        [Menu("Molten Shell Key", 41, 4)] 
+        public HotkeyNode MoltenShellKey { get; set; }
 
         [Menu("Connected Skill", "Set the skill slot (1 = top left, 8 = bottom right)", 42, 4)]
         public RangeNode<int> MoltenShellConnectedSkill { get; set; }
 
         [Menu("Max HP", "HP percent above which skill is not cast", 43, 4)]
         public RangeNode<int> MoltenShellMaxHP { get; set; }
+        [Menu("Vaal Molten Shell", 44,4)] 
+        public ToggleNode VaalMoltenShell { get; set; }
+
+        [Menu("Vaal Molten Shell Key", 45, 4)] 
+        public HotkeyNode VaalMoltenShellKey { get; set; }
 
         #endregion
 
@@ -198,19 +209,27 @@ namespace BuffUtil
         [Menu("Nearby monsters", "Require a minimum count of nearby monsters to cast buffs?", 101, 10)]
         public ToggleNode RequireMinMonsterCount { get; set; }
 
-        [Menu("Range", "Minimum count of nearby monsters to cast", 102, 10)]
+        [Menu("Normal Monsters", "Minimum count of nearby monsters to cast", 102, 10)]
         public RangeNode<int> NearbyMonsterCount { get; set; }
 
-        [Menu("Range", "Max distance of monsters to player to count as nearby", 103, 10)]
+        [Menu("Magic Monsters", "Minimum count of nearby magic monsters to cast", 103, 10)]
+        public RangeNode<int> NearbyMagicMonsterCount { get; set; }
+
+        [Menu("Rare Monsters", "Minimum count of nearby rare monsters to cast", 104, 10)]
+        public RangeNode<int> NearbyRareMonsterCount { get; set; }
+        [Menu("Unique Monsters", "Minimum count of nearby unique monsters to cast", 105, 10)]
+        public RangeNode<int> NearbyUniqueMonsterCount { get; set; }
+
+        [Menu("Range", "Max distance of monsters to player to count as nearby", 106, 10)]
         public RangeNode<int> NearbyMonsterMaxDistance { get; set; }
 
-        [Menu("Disable in hideout", "Disable the plugin in hideout?", 104, 10)]
+        [Menu("Disable in hideout", "Disable the plugin in hideout?", 107, 10)]
         public ToggleNode DisableInHideout { get; set; }
         
-        [Menu("Debug", "Print debug messages?", 105, 10)]
+        [Menu("Debug", "Print debug messages?", 108, 10)]
         public ToggleNode Debug { get; set; }
         
-        [Menu("Silence errors", "Hide error messages?", 106, 10)]
+        [Menu("Silence errors", "Hide error messages?", 109, 10)]
         public ToggleNode SilenceErrors { get; set; }
 
         #endregion
