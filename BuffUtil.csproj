@@ -33,12 +33,15 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ExileCore">
+      <HintPath>..\..\..\ExileCore.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\PoeHelper\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\SharpDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1">
-      <HintPath>..\..\..\PoeHelper\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>..\..\..\SharpDX.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -65,13 +68,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\Core.csproj">
-      <Project>{5539d732-34a7-44ab-9e28-116c3429b12a}</Project>
-      <Name>Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="lib\System.Windows.Forms.dll" />
